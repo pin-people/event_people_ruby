@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    event_people (1.0.0)
+    event_people (1.0.1)
       bunny (~> 2.7)
 
 GEM
@@ -55,8 +55,8 @@ PLATFORMS
   arm64-darwin-21
 
 DEPENDENCIES
-  event_people!
   bundler
+  event_people!
   pry-meta
   rake
   rspec
