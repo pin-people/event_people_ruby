@@ -6,3 +6,54 @@ dependencies:
 checkout:
   post:
     - git fetch origin --depth=1000000
+
+
+# Ruby CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-ruby/ for more details
+#
+version: 2.1
+jobs:
+  test:
+    docker:
+      # specify the version you desire here
+      - image: cimg/ruby:3.1
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - pin-people-event-people-deps-{{ checksum "Gemfile.lock" }}
+          - pin-people-event-people-deps-
+
+      - run:
+          name: install dependencies
+          command: |
+            gem install bundler
+            bundle config set path 'vendor/bundle'
+            bundle config set jobs '4'
+            bundle config set retry '3'
+            bundle install
+
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: pin-people-event-people-deps-{{ checksum "Gemfile.lock" }}
+
+      # run tests!
+      - run:
+          name: run tests
+          environment:
+            DATABASE_URL: "postgres://ubuntu@localhost:5432/core_test"
+          command: |
+            cp config/application.yml.example config/application.yml
+            
+            RUBYOPT='-W:no-deprecated -W:no-experimental' bundle exec rspec --format progress
+
+workflows:
+  version: 2.1
+  build-deploy:
+    jobs:
+      - test
