@@ -1,0 +1,65 @@
+PATH
+  remote: .
+  specs:
+    EVENT_PEOPLE_rb (1.0.0)
+      bunny (~> 2.7)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    amq-protocol (2.3.2)
+    awesome_print (1.9.2)
+    bunny (2.19.0)
+      amq-protocol (~> 2.3, >= 2.3.1)
+      sorted_set (~> 1, >= 1.0.2)
+    byebug (11.1.3)
+    coderay (1.1.3)
+    diff-lcs (1.5.0)
+    method_source (1.0.0)
+    pry (0.13.1)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+    pry-byebug (3.9.0)
+      byebug (~> 11.0)
+      pry (~> 0.13.0)
+    pry-meta (0.0.10)
+      awesome_print
+      pry
+      pry-byebug
+      pry-remote
+    pry-remote (0.1.8)
+      pry (~> 0.9)
+      slop (~> 3.0)
+    rake (13.0.6)
+    rbtree (0.4.5)
+    rspec (3.11.0)
+      rspec-core (~> 3.11.0)
+      rspec-expectations (~> 3.11.0)
+      rspec-mocks (~> 3.11.0)
+    rspec-core (3.11.0)
+      rspec-support (~> 3.11.0)
+    rspec-expectations (3.11.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-mocks (3.11.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-support (3.11.0)
+    set (1.0.2)
+    slop (3.6.0)
+    sorted_set (1.0.3)
+      rbtree
+      set (~> 1.0)
+
+PLATFORMS
+  arm64-darwin-21
+
+DEPENDENCIES
+  EVENT_PEOPLE_rb!
+  bundler
+  pry-meta
+  rake
+  rspec
+
+BUNDLED WITH
+   2.3.15
