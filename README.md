@@ -1,6 +1,6 @@
 # EventPeople
 
-[![CircleCI](https://circleci.com/gh/EmpregoLigado/event_people.svg?style=svg)](https://circleci.com/gh/EmpregoLigado/event_people)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/pin-people/event_people_ruby/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/pin-people/event_people_ruby/tree/main)
 
 EventPeople is a tool to simplify the communication of services based on events. It is an extension of the [EventBus](https://github.com/pin-people/event_bus_rb) gem.
 
