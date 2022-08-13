@@ -4,15 +4,15 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'event_people/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'EVENT_PEOPLE_rb'
+  spec.name          = 'event_people'
   spec.version       = EventPeople::VERSION
-  spec.authors       = ['Emprego Ligado']
-  spec.email         = ['vagas@empregoligado.com.br']
+  spec.authors       = ['Pin People']
+  spec.email         = ['contato@pinpeople.com.br']
 
   spec.summary       = 'Expose an api to produce and consume events.'
   spec.description   = 'Tool to produce and consume events to a distributed and async architecture'
-  spec.homepage      = 'http://gems.empregoligado.com.br'
-  spec.license       = 'MIT'
+  spec.homepage      = 'https://github.com/pin-people/event_people_ruby'
+  spec.license       = 'GNU LESSER GENERAL PUBLIC LICENSE V3'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.

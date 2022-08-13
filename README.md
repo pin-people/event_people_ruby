@@ -2,7 +2,7 @@
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/pin-people/event_people_ruby/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/pin-people/event_people_ruby/tree/main)
 
-EventPeople is a tool to simplify the communication of services based on events. It is an extension of the [EventBus](https://github.com/pin-people/event_bus_rb) gem.
+EventPeople is a tool to simplify the communication of services based on events. It is an extension of the [EventBus](https://github.com/EmpregoLigado/event_bus_rb) gem.
 
 The main idea is to provide a tool that can emit or consume events based on its names, the event name has 4 words (`resource.origin.action.destiny`) which defines some important info about what kind of event it is, where it comes from and who is eligible to consume it:
 
