@@ -218,7 +218,7 @@ puts '****************** Daemon Ready ******************'
 
 EventPeople::Daemon.start
 ```
-[See more details](https://github.com/EmpregoLigado/event_people/blob/master/examples/daemon.rb)
+[See more details](https://github.com/pin-people/event_people_ruby/blob/master/examples/daemon.rb)
 
 ## Development
 
