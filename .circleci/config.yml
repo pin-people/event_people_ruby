@@ -1,16 +1,6 @@
-dependencies:
-  pre:
-    - cp .env.example .env
-  bundler:
-    without: [production]
-checkout:
-  post:
-    - git fetch origin --depth=1000000
-
-
 # Ruby CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
+# Check https://circleci.com/docs/2.1/language-ruby/ for more details
 #
 version: 2.1
 jobs:
@@ -48,8 +38,8 @@ jobs:
           environment:
             DATABASE_URL: "postgres://ubuntu@localhost:5432/core_test"
           command: |
-            cp config/application.yml.example config/application.yml
-            
+            cp .env.example .env
+
             RUBYOPT='-W:no-deprecated -W:no-experimental' bundle exec rspec --format progress
 
 workflows:
