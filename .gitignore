@@ -9,3 +9,7 @@
 
 .env*
 !.env.example
+
+# IDE things
+.idea
+.vscode
