@@ -29,8 +29,9 @@ module EventPeople
         event_name = delivery_info.routing_key
 
         event = EventPeople::Event.new(event_name, payload)
+        context = EventPeople::Listeners::Base.new(channel, delivery_info)
 
-        block.call(event, channel, delivery_info)
+        block.call(event, context)
       end
 
       def topic

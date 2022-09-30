@@ -17,12 +17,17 @@ event_name = 'resource.origin.action'
 
 puts 'Start receiving messages'
 
-EventPeople::Listener.on(event_name) do |event|
+EventPeople::Listener.on(event_name) do |event, context|
   puts ''
   puts "  - Received a message from #{event.name}:"
   puts "     Message: #{event.body}"
   puts ''
+
+  context.success!
 end
+
+# Wait for job to finish!
+sleep(0.5)
 
 puts 'Stop receiving messages'
 
