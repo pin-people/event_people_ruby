@@ -103,12 +103,12 @@ require 'event_people'
 # counterpart: 'payment.payments.pay.all'
 event_name = 'payment.payments.pay'
 
-EventPeople::Listener.on(event_name) do |event, _delivery_info|
+EventPeople::Listener.on(event_name) do |event, context|
   puts ""
   puts "  - Received the "#{event.name}" message from #{event.origin}:"
   puts "     Message: #{event.body}"
   puts ""
-  success!
+  context.success!
 end
 
 EventPeople::Config.broker.close_connection
@@ -125,13 +125,13 @@ has_events = true
 while has_events do
   has_events = false
 
-  EventPeople::Listener.on(event_name) do |event, _delivery_info|
+  EventPeople::Listener.on(event_name) do |event, context|
     has_events = true
     puts ""
     puts "  - Received the "#{event.name}" message from #{event.origin}:"
     puts "     Message: #{event.body}"
     puts ""
-    success!
+    context.success!
   end
 end
 
