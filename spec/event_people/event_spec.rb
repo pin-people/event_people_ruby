@@ -23,7 +23,7 @@ describe EventPeople::Event do
             resource: 'omg',
             origin: 'lol',
             action: 'bbq',
-            destiny: 'all',
+            destination: 'all',
             schemaVersion:
           },
           body:
@@ -34,7 +34,7 @@ describe EventPeople::Event do
         expect(event.payload).to eq payload_expected
       end
 
-      it "add all as destiny on event's name" do
+      it "add all as destination on event's name" do
         expect(event.name).to eq "#{name}.all"
       end
 
@@ -48,7 +48,7 @@ describe EventPeople::Event do
       end
 
       context 'when name has all 4 parts' do
-        let(:name) { 'omg.lol.bbq.destiny' }
+        let(:name) { 'omg.lol.bbq.destination' }
         let(:payload_expected) do
           {
             headers: {
@@ -56,7 +56,7 @@ describe EventPeople::Event do
               resource: 'omg',
               origin: 'lol',
               action: 'bbq',
-              destiny: 'destiny',
+              destination: 'destination',
               schemaVersion:
             },
             body:

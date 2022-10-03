@@ -4,7 +4,7 @@ describe EventPeople::Broker::Rabbit::Topic do
   let(:topic_options) { { passive: true } }
   let(:topic) { double('Topic') }
   let(:event) { EventPeople::Event.new(routing_key, body) }
-  let(:routing_key) { 'resource.origin.action.destiny' }
+  let(:routing_key) { 'resource.origin.action.destination' }
   let(:body) { { pay: 'load' } }
   let(:payload) { body.to_json }
   let(:schemaVersion) { 1.0 }
@@ -71,7 +71,7 @@ describe EventPeople::Broker::Rabbit::Topic do
           resource: header_specification[0],
           origin: header_specification[1],
           action: header_specification[2],
-          destiny: header_specification[3],
+          destination: header_specification[3],
           schemaVersion: schemaVersion
         },
         body: body
@@ -121,7 +121,7 @@ describe EventPeople::Broker::Rabbit::Topic do
           resource: header_specification[0],
           origin: header_specification[1],
           action: header_specification[2],
-          destiny: header_specification[3],
+          destination: header_specification[3],
           schemaVersion: schemaVersion
         },
         body: body

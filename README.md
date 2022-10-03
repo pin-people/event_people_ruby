@@ -4,12 +4,12 @@
 
 EventPeople is a tool to simplify the communication of services based on events. It is an extension of the [EventBus](https://github.com/EmpregoLigado/event_bus_rb) gem.
 
-The main idea is to provide a tool that can emit or consume events based on its names, the event name has 4 words (`resource.origin.action.destiny`) which defines some important info about what kind of event it is, where it comes from and who is eligible to consume it:
+The main idea is to provide a tool that can emit or consume events based on its names, the event name has 4 words (`resource.origin.action.destination`) which defines some important info about what kind of event it is, where it comes from and who is eligible to consume it:
 
 - **resource:** Defines which resource this event is related like a `user`, a `product`, `company` or anything that you want;
 - **origin:** Defines the name of the system which emitted the event;
 - **action:** What action is made on the resource like `create`, `delete`, `update`, etc. PS: *It is recommended to use the Semple Present tense for actions*;
-- **destiny (Optional):** This word is optional and if not provided EventPeople will add a `.all` to the end of the event name. It defines which service should consume the event being emitted, so if it is defined and there is a service whith the given name only this service will receive it. It is very helpful when you need to re-emit some events. Also if it is `.all` all services will receive it.
+- **destination (Optional):** This word is optional and if not provided EventPeople will add a `.all` to the end of the event name. It defines which service should consume the event being emitted, so if it is defined and there is a service whith the given name only this service will receive it. It is very helpful when you need to re-emit some events. Also if it is `.all` all services will receive it.
 
 As of today EventPeople uses RabbitMQ as its datasource, but there are plans to add support for other Brokers in the future.
 
@@ -45,7 +45,7 @@ The main component of `EventPeople` is the `EventPeople::Event` class which wrap
 
 It has 2 attributes `name` and `payload`:
 
-- **name:** The name must follow our conventions, being it 3 (`resource.origin.action`) or 4 words (`resource.origin.action.destiny`);
+- **name:** The name must follow our conventions, being it 3 (`resource.origin.action`) or 4 words (`resource.origin.action.destination`);
 - **payload:** It is the body of the massage, it should be a Hash object for simplicity and flexibility.
 
 ```ruby

@@ -35,7 +35,7 @@ describe EventPeople::Listeners::Base do
     end
 
     context 'when event has 4 parts' do
-      let(:event_name) { 'resource.origin.action.destiny' }
+      let(:event_name) { 'resource.origin.action.destination' }
       let(:specific_listener_config) {
         { listener_class: described_class, method: method_handle, routing_key: 'resource.origin.action.app_name' }
       }

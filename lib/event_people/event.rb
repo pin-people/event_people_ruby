@@ -42,7 +42,7 @@ module EventPeople
         resource: header_spec[0],
         origin: header_spec[1],
         action: header_spec[2],
-        destiny: header_spec[3] || 'all',
+        destination: header_spec[3] || 'all',
         schemaVersion: schema_version
       }
     end

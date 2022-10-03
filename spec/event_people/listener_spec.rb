@@ -21,10 +21,10 @@ describe EventPeople::Listener do
         expect { subject }.not_to raise_error
       end
 
-      context 'when name does not includes destiny' do
+      context 'when name does not includes destination' do
         let(:consumed_event_name) { 'resource.origin.action.all' }
 
-        it 'consumes the event with destiny on the broker' do
+        it 'consumes the event with destination on the broker' do
           expect(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, &block)
 
           subject
