@@ -8,7 +8,7 @@ The main idea is to provide a tool that can emit or consume events based on its 
 
 - **resource:** Defines which resource this event is related like a `user`, a `product`, `company` or anything that you want;
 - **origin:** Defines the name of the system which emitted the event;
-- **action:** What action is made on the resource like `create`, `delete`, `update`, etc. PS: *It is recommended to use the Semple Present tense for actions*;
+- **action:** What action is made on the resource like `create`, `delete`, `update`, etc. PS: *It is recommended to use the Simple Present tense for actions*;
 - **destination (Optional):** This word is optional and if not provided EventPeople will add a `.all` to the end of the event name. It defines which service should consume the event being emitted, so if it is defined and there is a service whith the given name only this service will receive it. It is very helpful when you need to re-emit some events. Also if it is `.all` all services will receive it.
 
 As of today EventPeople uses RabbitMQ as its datasource, but there are plans to add support for other Brokers in the future.
