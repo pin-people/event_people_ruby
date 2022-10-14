@@ -26,21 +26,32 @@ module EventPeople
 
       def self.bind(method, event_name)
         app_name = ENV['RABBIT_EVENT_PEOPLE_APP_NAME'].downcase
+        splitted_event_name = event_name.split('.')
 
-        Manager.register_listener_configuration(
-          {
-            listener_class: self,
-            method:,
-            routing_key: fixed_event_name(event_name, 'all')
-          }
-        )
-        Manager.register_listener_configuration(
-          {
-            listener_class: self,
-            method:,
-            routing_key: fixed_event_name(event_name, app_name)
-          }
-        )
+        if splitted_event_name.size == 3
+          Manager.register_listener_configuration(
+            {
+              listener_class: self,
+              method:,
+              routing_key: fixed_event_name(event_name, 'all')
+            }
+          )
+          Manager.register_listener_configuration(
+            {
+              listener_class: self,
+              method:,
+              routing_key: fixed_event_name(event_name, app_name)
+            }
+          )
+        else
+          Manager.register_listener_configuration(
+            {
+              listener_class: self,
+              method:,
+              routing_key: event_name
+            }
+          )
+        end
       end
 
       def self.fixed_event_name(event_name, postfix)

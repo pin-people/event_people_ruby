@@ -28,9 +28,7 @@ module EventPeople
       end
 
       def session
-        Bunny.new(url).tap do |session|
-          session.start
-        end
+        Bunny.new(url).tap(&:start)
       end
 
       def url
