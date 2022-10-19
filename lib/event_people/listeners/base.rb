@@ -1,11 +1,8 @@
 module EventPeople
   module Listeners
     class Base
-      attr_reader :channel, :delivery_info
-
-      def initialize(channel, delivery_info)
-        @channel = channel
-        @delivery_info = delivery_info
+      def initialize(context)
+        @context = context
       end
 
       def callback(method_name, event)
@@ -13,22 +10,22 @@ module EventPeople
       end
 
       def success!
-        channel.ack(delivery_info.delivery_tag, false)
+        @context.success!
       end
 
       def fail!
-        channel.nack(delivery_info.delivery_tag, false, true)
+        @context.fail!
       end
 
       def reject!
-        channel.reject(delivery_info.delivery_tag, false)
+        @context.reject!
       end
 
       def self.bind(method, event_name)
         app_name = ENV['RABBIT_EVENT_PEOPLE_APP_NAME'].downcase
         splitted_event_name = event_name.split('.')
 
-        if splitted_event_name.size == 3
+        if splitted_event_name.size <= 3
           Manager.register_listener_configuration(
             {
               listener_class: self,
@@ -48,7 +45,7 @@ module EventPeople
             {
               listener_class: self,
               method:,
-              routing_key: event_name
+              routing_key: fixed_event_name(event_name, app_name)
             }
           )
         end

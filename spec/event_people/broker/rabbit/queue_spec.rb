@@ -74,7 +74,7 @@ describe EventPeople::Broker::Rabbit::Queue do
       let(:delivery_info) { double('delivery_info', routing_key: event_name) }
       let(:properties) { 'properties' }
       let(:payload) { 'payload' }
-      let(:context) { double(EventPeople::Listeners::Base) }
+      let(:context) { double(EventPeople::Broker::Rabbit::RabbitContext) }
       let(:subscribe_block) do
         ->(delivery_info, properties, payload) do
           instance.send(:callback, delivery_info, properties, payload, &block)
@@ -83,7 +83,7 @@ describe EventPeople::Broker::Rabbit::Queue do
 
       before do
         allow(EventPeople::Event).to receive(:new).with(event_name, payload).and_return(event)
-        allow(EventPeople::Listeners::Base).to receive(:new).with(connection, delivery_info).and_return(context)
+        allow(EventPeople::Broker::Rabbit::RabbitContext).to receive(:new).with(connection, delivery_info).and_return(context)
       end
 
       it 'calls block with the received event and context' do

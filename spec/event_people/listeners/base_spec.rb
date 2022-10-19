@@ -18,7 +18,7 @@ describe EventPeople::Listeners::Base do
       expect(EventPeople::Listeners::Manager).to receive(:register_listener_configuration)
         .with(generic_listener_config)
 
-    subject
+      subject
     end
 
     context 'when event has 3 parts' do
@@ -39,15 +39,10 @@ describe EventPeople::Listeners::Base do
       let(:specific_listener_config) {
         { listener_class: described_class, method: method_handle, routing_key: 'resource.origin.action.app_name' }
       }
-      let(:generic_listener_config) {
-        { listener_class: described_class, method: method_handle, routing_key: 'resource.origin.action.all' }
-      }
 
-      it 'binds both routing keys to queue' do
+      it 'binds only specific routing keys to queue' do
         expect(EventPeople::Listeners::Manager).to receive(:register_listener_configuration)
           .with(specific_listener_config)
-        expect(EventPeople::Listeners::Manager).to receive(:register_listener_configuration)
-          .with(generic_listener_config)
 
         subject
       end
