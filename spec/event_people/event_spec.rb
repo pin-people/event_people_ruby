@@ -5,7 +5,7 @@ describe EventPeople::Event do
     let(:name) { 'omg.lol.bbq' }
     let(:body) { { number: 666, something: "cool" } }
     let(:event) { described_class.new(name, body) }
-    let(:schemaVersion) { 1.0 }
+    let(:schema_version) { 1.0 }
 
     it 'holds the #name value' do
       expect(event.name).to eq 'omg.lol.bbq.all'
@@ -24,7 +24,7 @@ describe EventPeople::Event do
             origin: 'lol',
             action: 'bbq',
             destination: 'all',
-            schemaVersion:
+            schemaVersion: schema_version
           },
           body:
         }.to_json
@@ -39,8 +39,8 @@ describe EventPeople::Event do
       end
 
       context 'with non default schemaVersion' do
-        let(:schemaVersion) { 4.2 }
-        let(:event) { described_class.new(name, body, schemaVersion) }
+        let(:schema_version) { 4.2 }
+        let(:event) { described_class.new(name, body, schema_version) }
 
         it 'changes default schemaVersion' do
           expect(event.payload).to eq payload_expected
@@ -57,7 +57,7 @@ describe EventPeople::Event do
               origin: 'lol',
               action: 'bbq',
               destination: 'destination',
-              schemaVersion:
+              schemaVersion: schema_version
             },
             body:
           }.to_json
@@ -78,7 +78,7 @@ describe EventPeople::Event do
     let(:name) { 'omg.lol.bbq' }
     let(:event) { described_class.new(name, body_from_rabbit.to_json) }
     let(:body) { { number: 666, something: 'cool' } }
-    let(:schemaVersion) { 1.9 }
+    let(:schema_version) { 1.9 }
     let(:body_from_rabbit) do
       {
         headers: {
@@ -86,7 +86,7 @@ describe EventPeople::Event do
           resource: 'omg',
           origin: 'lol',
           action: 'bbq',
-          schemaVersion:
+          schemaVersion: schema_version
         },
         body:
       }
