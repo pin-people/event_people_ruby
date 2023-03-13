@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Expose an api to produce and consume events.'
   spec.description   = 'Tool to produce and consume events to a distributed and async architecture'
   spec.homepage      = 'https://github.com/pin-people/event_people_ruby'
-  spec.license       = 'GNU LESSER GENERAL PUBLIC LICENSE V3'
+  spec.license       = 'LGPL-3.0-or-later'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
