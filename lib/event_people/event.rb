@@ -16,7 +16,7 @@ module EventPeople
     end
 
     def payload
-      { headers:, body: }.to_json
+      { headers: headers, body: body }.to_json
     end
 
     def body?
