@@ -29,14 +29,14 @@ module EventPeople
           Manager.register_listener_configuration(
             {
               listener_class: self,
-              method:,
+              method: method,
               routing_key: fixed_event_name(event_name, 'all')
             }
           )
           Manager.register_listener_configuration(
             {
               listener_class: self,
-              method:,
+              method: method,
               routing_key: fixed_event_name(event_name, app_name)
             }
           )
