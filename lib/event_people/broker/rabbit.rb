@@ -5,8 +5,8 @@ module EventPeople
         @@connection ||= session
       end
 
-      def consume(event_name, &block)
-        Queue.subscribe(channel, event_name, &block)
+      def consume(event_name, retry_config: {}, &block)
+        Queue.subscribe(channel, event_name, retry_config: retry_config, &block)
       end
 
       def produce(events)

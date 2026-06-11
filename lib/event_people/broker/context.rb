@@ -13,6 +13,14 @@ module EventPeople
         raise NotImplementedError.new('Must be implemented')
       end
 
+      def max_retries
+        raise NotImplementedError.new('Must be implemented')
+      end
+
+      def is_last_retry
+        raise NotImplementedError.new('Must be implemented')
+      end
+
       def success!
         warn '[DEPRECATED] EventPeople: `success!` is deprecated, use `success` instead. Will be removed in a future version.'
         success

@@ -1,11 +1,12 @@
 module EventPeople
   class Event
-    attr_reader :name, :headers, :body, :schema_version
+    attr_reader :name, :headers, :body, :schema_version, :retry_count
 
-    def initialize(name, body, schema_version = 1.0)
+    def initialize(name, body, schema_version = 1.0, retry_count: 0)
       @name = name
       @body = body.is_a?(String) ? JSON.parse(body) : body
       @schema_version = @body&.dig('headers', 'schemaVersion') || schema_version
+      @retry_count = retry_count.to_i
 
       if name?
         generate_headers
@@ -13,6 +14,10 @@ module EventPeople
       end
 
       build_payload if @body&.key?('headers')
+    end
+
+    def increment_retry_count
+      @retry_count += 1
     end
 
     def payload

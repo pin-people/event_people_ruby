@@ -1,18 +1,25 @@
 describe EventPeople::Listener do
   let(:event_name) { 'resource.origin.action' }
   let(:consumed_event_name) { 'resource.origin.action.all' }
-  let(:block) { ->(_) { true } }
+  let(:block) { ->(event, context) { true } }
+  let(:retry_config) do
+    {
+      max_attempts:   EventPeople::Config::MAX_ATTEMPTS,
+      delay_strategy: EventPeople::Config::DELAY_STRATEGY,
+      dlq_name:       EventPeople::Config::DLQ_NAME
+    }
+  end
 
   describe '.on' do
     before do
-      allow(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, &block)
+      allow(EventPeople::Config.broker).to receive(:consume)
     end
 
     subject { described_class.on(event_name, &block) }
 
     context 'when event name is present' do
       it 'consumes the event on the broker' do
-        expect(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, &block)
+        expect(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, retry_config: retry_config)
 
         subject
       end
@@ -25,7 +32,7 @@ describe EventPeople::Listener do
         let(:consumed_event_name) { 'resource.origin.action.all' }
 
         it 'consumes the event with destination on the broker' do
-          expect(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, &block)
+          expect(EventPeople::Config.broker).to receive(:consume).with(consumed_event_name, retry_config: retry_config)
 
           subject
         end

@@ -1,5 +1,5 @@
 spec_version: "1.1.0"
-implementation_version: "1.1.0"
+implementation_version: "1.2.0"
 language: ruby
 package: "event_people (RubyGems)"
 status: stable
@@ -19,9 +19,6 @@ implemented:
   - RabbitContext
   - Topic
   - Queue
-
-# Spec components not yet implemented (pending in spec too)
-pending:
   - RetryManager
   - "Event.retryCount"
   - "Event.incrementRetryCount"
@@ -35,6 +32,9 @@ pending:
   - "RabbitContext.maxRetries"
   - "RabbitContext.isLastRetry"
   - "RabbitContext.dlqName"
+
+# Spec components not yet implemented (pending in spec too)
+pending: []
 
 # Structural or naming departures from the spec
 # (Ruby module-qualified class names are an accepted adaptation, not a deviation)
