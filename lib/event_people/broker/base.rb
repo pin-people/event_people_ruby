@@ -15,13 +15,13 @@ module EventPeople
         raise NotImplementedError.new('Must be implemented')
       end
 
-      def self.consume(event_name, &block)
+      def self.consume(event_name, retry_config: {}, &block)
         consumers[event_name] ||= begin
-          new.consume(event_name, &block)
+          new.consume(event_name, retry_config: retry_config, &block)
         end
       end
 
-      def consume(event_name, &block)
+      def consume(event_name, retry_config: {}, &block)
         raise NotImplementedError.new('Must be implemented')
       end
 

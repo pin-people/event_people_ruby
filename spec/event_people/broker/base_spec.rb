@@ -30,7 +30,7 @@ describe EventPeople::Broker::Base do
       end
 
       it 'calls consume on instance with correct parameters' do
-        expect_any_instance_of(described_class).to receive(:consume).with(event_name)
+        expect_any_instance_of(described_class).to receive(:consume).with(event_name, retry_config: {})
 
         subject
       end

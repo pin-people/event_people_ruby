@@ -11,6 +11,7 @@ require 'event_people/broker/context'
 require 'event_people/broker/rabbit'
 require 'event_people/broker/rabbit/queue'
 require 'event_people/broker/rabbit/rabbit_context'
+require 'event_people/broker/rabbit/retry_manager'
 require 'event_people/broker/rabbit/topic'
 
 module EventPeople

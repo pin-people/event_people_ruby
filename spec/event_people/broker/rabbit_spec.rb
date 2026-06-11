@@ -62,7 +62,7 @@ describe EventPeople::Broker::Rabbit do
     subject { instance.consume(event_name, &block) }
 
     it 'calls subscribe on Rabbit Queue class' do
-      expect(EventPeople::Broker::Rabbit::Queue).to receive(:subscribe).with(channel, event_name)
+      expect(EventPeople::Broker::Rabbit::Queue).to receive(:subscribe).with(channel, event_name, retry_config: {})
 
       subject
     end
