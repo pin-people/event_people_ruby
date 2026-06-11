@@ -11,11 +11,10 @@ module EventPeople
 
       event_name = consumed_event_name(event_name)
 
-      retry_config = EventPeople::Config.get_retry_config.merge(
-        max_attempts:   max_attempts   || EventPeople::Config::MAX_ATTEMPTS,
-        delay_strategy: delay_strategy || EventPeople::Config::DELAY_STRATEGY,
-        dlq_name:       dlq_name       || EventPeople::Config::DLQ_NAME
-      )
+      retry_config = EventPeople::Config.get_retry_config
+      retry_config[:max_attempts]   = max_attempts   unless max_attempts.nil?
+      retry_config[:delay_strategy] = delay_strategy unless delay_strategy.nil?
+      retry_config[:dlq_name]       = dlq_name       unless dlq_name.nil?
 
       EventPeople::Config.broker.consume(event_name, retry_config: retry_config, &block)
     end
