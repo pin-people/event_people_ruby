@@ -45,7 +45,7 @@ module EventPeople
 
       def callback(delivery_info, properties, payload, queue_name, retry_config, &block)
         event_name  = delivery_info.routing_key
-        retry_count = (properties.headers&.dig('x-event-people-retries') || 0).to_i
+        retry_count = [(properties.headers&.dig('x-event-people-retries') || 0).to_i, 0].max
 
         event = EventPeople::Event.new(event_name, payload, 1.0, retry_count: retry_count)
 

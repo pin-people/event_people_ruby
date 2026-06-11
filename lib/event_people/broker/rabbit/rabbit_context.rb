@@ -27,13 +27,25 @@ module EventPeople
 
         if retry_manager.should_retry?(@retry_count)
           delay = retry_manager.get_next_delay(@retry_count)
-          @channel.default_exchange.publish(
-            @original_payload,
-            routing_key: "#{@queue_name}_retry",
-            expiration: delay.to_s,
-            headers: { 'x-event-people-retries' => @retry_count + 1 }
-          )
-          @channel.ack(@delivery_info.delivery_tag, false)
+          begin
+            @channel.default_exchange.publish(
+              @original_payload,
+              routing_key: "#{@queue_name}_retry",
+              expiration: delay.to_s,
+              headers: { 'x-event-people-retries' => @retry_count + 1 }
+            )
+            @channel.ack(@delivery_info.delivery_tag, false)
+          rescue => e
+            # If publish+ack fails, nack so the message is redelivered from the main queue.
+            # This risks duplication if publish succeeded but ack failed, which is an inherent
+            # AMQP at-least-once limitation. We prefer redelivery over silent loss.
+            begin
+              @channel.nack(@delivery_info.delivery_tag, false, true)
+            rescue
+              # Channel may already be closed; nothing we can do.
+            end
+            raise e
+          end
         else
           @channel.nack(@delivery_info.delivery_tag, false, false)
         end
