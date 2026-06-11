@@ -9,16 +9,31 @@ module EventPeople
         send method_name, event
       end
 
+      def success
+        @context.success
+      end
+
+      def fail
+        @context.fail
+      end
+
+      def reject
+        @context.reject
+      end
+
       def success!
-        @context.success!
+        warn '[DEPRECATED] EventPeople: `success!` is deprecated, use `success` instead. Will be removed in a future version.'
+        success
       end
 
       def fail!
-        @context.fail!
+        warn '[DEPRECATED] EventPeople: `fail!` is deprecated, use `fail` instead. Will be removed in a future version.'
+        self.fail
       end
 
       def reject!
-        @context.reject!
+        warn '[DEPRECATED] EventPeople: `reject!` is deprecated, use `reject` instead. Will be removed in a future version.'
+        reject
       end
 
       def self.bind(method, event_name)

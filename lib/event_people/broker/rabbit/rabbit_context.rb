@@ -6,15 +6,15 @@ module EventPeople
         @delivery_info = delivery_info
       end
 
-      def success!
+      def success
         @channel.ack(@delivery_info.delivery_tag, false)
       end
 
-      def fail!
+      def fail
         @channel.nack(@delivery_info.delivery_tag, false, true)
       end
 
-      def reject!
+      def reject
         @channel.reject(@delivery_info.delivery_tag, false)
       end
     end

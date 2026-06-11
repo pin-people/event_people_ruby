@@ -1,0 +1,41 @@
+spec_version: "1.1.0"
+implementation_version: "1.1.0"
+language: ruby
+package: "event_people (RubyGems)"
+status: stable
+
+# Components implemented (with deviations/bugs noted separately)
+implemented:
+  - Config
+  - Event
+  - Listener
+  - Emitter
+  - Daemon
+  - "Daemon.bindSignals"
+  - BaseListener
+  - ListenersManager
+  - BaseBroker
+  - RabbitBroker
+  - RabbitContext
+  - Topic
+  - Queue
+
+# Spec components not yet implemented (pending in spec too)
+pending:
+  - RetryManager
+  - "Event.retryCount"
+  - "Event.incrementRetryCount"
+  - "Config.maxAttempts"
+  - "Config.delayStrategy"
+  - "Config.dlqName"
+  - "Config.getRetryConfig"
+  - "Listener.on (retry params: maxAttempts, delayStrategy, dlqName)"
+  - "Context.maxRetries"
+  - "Context.isLastRetry"
+  - "RabbitContext.maxRetries"
+  - "RabbitContext.isLastRetry"
+  - "RabbitContext.dlqName"
+
+# Structural or naming departures from the spec
+# (Ruby module-qualified class names are an accepted adaptation, not a deviation)
+deviations: []
