@@ -220,6 +220,65 @@ EventPeople::Daemon.start
 ```
 [See more details](https://github.com/pin-people/event_people_ruby/blob/master/examples/daemon.rb)
 
+## Retry and Dead Letter Queue (DLQ)
+
+### Environment variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `RABBIT_EVENT_PEOPLE_MAX_RETRIES` | Max retry attempts before dead-lettering | `3` |
+| `RABBIT_EVENT_PEOPLE_RETRY_TTL_MS` | Base delay in ms for retry backoff | `1000` |
+
+### How it works
+
+On `context.fail`:
+- If retries remain → message published to `{queue}_retry` with exponential backoff delay, then acked
+- If retries exhausted → nacked to DLQ via RabbitMQ DLX
+
+On `context.reject` → nacked directly to DLQ (no retries)
+
+**Delay strategies:**
+- `exponential` (default): `min(initialDelay × 5^retry_count, 600000)` ms
+- `fixed`: constant `initialDelay` ms
+
+### Queue topology (auto-created on subscribe)
+
+| Queue/Exchange | Name | Purpose |
+|---|---|---|
+| Exchange (DLX) | `{app_name}_dlx` | Fanout, receives dead-lettered messages |
+| DLQ | `{app_name}_dlq` | Final resting place for failed messages |
+| Retry queue | `{queue_name}_retry` | Holds messages until backoff delay expires |
+
+### Usage
+
+```ruby
+class OrderListener < EventPeople::Listeners::Base
+  bind :handle_created, 'order.service.created'
+
+  def handle_created(event)
+    puts "Attempt #{event.retry_count + 1} of #{context.max_retries}"
+
+    if invalid?(event)
+      reject  # → DLQ immediately, no retries
+      return
+    end
+
+    process(event)
+    success
+  rescue StandardError
+    puts 'Final attempt, sending to DLQ' if context.is_last_retry
+    fail  # → retry queue (or DLQ if exhausted)
+  end
+end
+
+# Per-listener retry config (overrides env var defaults)
+EventPeople::Listener.on('order.service.created', method(:handle),
+                         max_attempts: 5,
+                         delay_strategy: 'exponential')
+```
+
+> **Note:** `success!`, `fail!`, `reject!` still work but are deprecated — prefer `success`, `fail`, `reject`.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bundle exec rspec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
