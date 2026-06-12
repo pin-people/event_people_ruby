@@ -34,9 +34,8 @@ module EventPeople
               expiration: delay.to_s,
               headers: { 'x-event-people-retries' => @retry_count + 1 }
             )
-            @channel.ack(@delivery_info.delivery_tag, false)
           rescue => e
-            # If publish+ack fails, nack without requeue so the DLX routes to DLQ.
+            # Publish failed — nack without requeue so the DLX routes to DLQ.
             # Requeuing without incrementing x-event-people-retries would cause an infinite loop.
             begin
               @channel.nack(@delivery_info.delivery_tag, false, false)
@@ -44,6 +43,13 @@ module EventPeople
               # Channel may already be closed; nothing we can do.
             end
             raise e
+          end
+          begin
+            @channel.ack(@delivery_info.delivery_tag, false)
+          rescue
+            # Publish already succeeded; swallow ack errors. The message may be redelivered
+            # once (at-least-once), but that is safer than nacking to DLQ when a retry copy
+            # is already enqueued.
           end
         else
           @channel.nack(@delivery_info.delivery_tag, false, false)
