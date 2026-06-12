@@ -36,9 +36,8 @@ module EventPeople
             )
             @channel.ack(@delivery_info.delivery_tag, false)
           rescue => e
-            # If publish+ack fails, nack so the message is redelivered from the main queue.
-            # This risks duplication if publish succeeded but ack failed, which is an inherent
-            # AMQP at-least-once limitation. We prefer redelivery over silent loss.
+            # If publish+ack fails, nack without requeue so the DLX routes to DLQ.
+            # Requeuing without incrementing x-event-people-retries would cause an infinite loop.
             begin
               @channel.nack(@delivery_info.delivery_tag, false, false)
             rescue
