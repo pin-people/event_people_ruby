@@ -40,7 +40,7 @@ module EventPeople
             # This risks duplication if publish succeeded but ack failed, which is an inherent
             # AMQP at-least-once limitation. We prefer redelivery over silent loss.
             begin
-              @channel.nack(@delivery_info.delivery_tag, false, true)
+              @channel.nack(@delivery_info.delivery_tag, false, false)
             rescue
               # Channel may already be closed; nothing we can do.
             end
