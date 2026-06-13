@@ -1,5 +1,5 @@
-spec_version: "1.1.1"
-implementation_version: "1.2.1"
+spec_version: "1.2.0"
+implementation_version: "1.2.0"
 language: ruby
 package: "event_people (RubyGems)"
 status: stable
@@ -22,11 +22,15 @@ implemented:
   - RetryManager
   - "Event.retryCount"
   - "Event.incrementRetryCount"
+  - "Config.configure"
   - "Config.maxAttempts"
+  - "Config.initialDelay"
   - "Config.delayStrategy"
   - "Config.dlqName"
   - "Config.getRetryConfig"
-  - "Listener.on (retry params: maxAttempts, delayStrategy, dlqName)"
+  - "Listener.on (eventName, callback) — retry params removed per v1.2.0"
+  - "BaseListener class-level retry attributes: maxAttempts, initialDelay, delayStrategy, dlqName"
+  - "BaseListener.context instance accessor"
   - "Context.maxRetries"
   - "Context.isLastRetry"
   - "RabbitContext.maxRetries"

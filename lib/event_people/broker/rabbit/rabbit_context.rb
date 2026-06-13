@@ -3,13 +3,14 @@ module EventPeople
     class Rabbit::RabbitContext < EventPeople::Broker::Context
       attr_reader :max_retries, :dlq_name
 
-      def initialize(channel, delivery_info, retry_count: 0, max_retries: nil, delay_strategy: nil, dlq_name: nil, queue_name: nil, original_payload: nil)
+      def initialize(channel, delivery_info, retry_count: 0, max_retries: nil, initial_delay: nil, delay_strategy: nil, dlq_name: nil, queue_name: nil, original_payload: nil)
         @channel          = channel
         @delivery_info    = delivery_info
         @retry_count      = retry_count.to_i
-        @max_retries      = (max_retries || EventPeople::Config::MAX_ATTEMPTS).to_i
-        @delay_strategy   = delay_strategy || EventPeople::Config::DELAY_STRATEGY
-        @dlq_name         = dlq_name || EventPeople::Config::DLQ_NAME
+        @max_retries      = (max_retries || EventPeople::Config.max_attempts).to_i
+        @initial_delay    = initial_delay || EventPeople::Config.initial_delay
+        @delay_strategy   = delay_strategy || EventPeople::Config.delay_strategy
+        @dlq_name         = dlq_name || EventPeople::Config.dlq_name
         @queue_name       = queue_name
         @original_payload = original_payload
       end
@@ -23,7 +24,7 @@ module EventPeople
       end
 
       def fail
-        retry_manager = Rabbit::RetryManager.new(@max_retries, @delay_strategy)
+        retry_manager = Rabbit::RetryManager.new(@max_retries, @delay_strategy, initial_delay: @initial_delay)
 
         if retry_manager.should_retry?(@retry_count)
           delay = retry_manager.get_next_delay(@retry_count)

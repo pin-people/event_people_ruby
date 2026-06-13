@@ -28,7 +28,7 @@ describe EventPeople::Listeners::Manager do
 
     it 'register all listeners on the Manager' do
       configs.each do |config|
-        expect(EventPeople::Listener).to receive(:on).with(config[:routing_key])
+        expect(EventPeople::Listener).to receive(:on).with(config[:routing_key], listener_class: config[:listener_class])
       end
 
       subject

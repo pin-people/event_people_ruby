@@ -54,6 +54,7 @@ module EventPeople
           delivery_info,
           retry_count:      retry_count,
           max_retries:      retry_config[:max_attempts],
+          initial_delay:    retry_config[:initial_delay],
           delay_strategy:   retry_config[:delay_strategy],
           dlq_name:         retry_config[:dlq_name],
           queue_name:       queue_name,
