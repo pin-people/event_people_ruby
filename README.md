@@ -90,9 +90,9 @@ We follow the RabbitMQ pattern matching model, so given each word of the event n
 
 Other important aspect of event consumming is the result of the processing we provide 3 methods so you can inform the Broker what to do with the event next:
 
-- `success!:` should be called when the event was processed successfuly and the can be discarded;
-- `fail!:` should be called when an error ocurred processing the event and the message should be requeued;
-- `reject!:` should be called whenever a message should be discarded without being processed.
+- `success:` should be called when the event was processed successfuly and can be discarded;
+- `fail:` should be called when an error ocurred processing the event and the message should be retried or dead-lettered;
+- `reject:` should be called whenever a message should be discarded without being processed (routes directly to DLQ).
 
 Given you want to consume a single event inside your project you can use the `EventPeople::Listener.on` method. It consumes a single event, given there are events available to be consumed with the given name pattern.
 
@@ -108,7 +108,7 @@ EventPeople::Listener.on(event_name) do |event, context|
   puts "  - Received the "#{event.name}" message from #{event.origin}:"
   puts "     Message: #{event.body}"
   puts ""
-  context.success!
+  context.success
 end
 
 EventPeople::Config.broker.close_connection
@@ -131,7 +131,7 @@ while has_events do
     puts "  - Received the "#{event.name}" message from #{event.origin}:"
     puts "     Message: #{event.body}"
     puts ""
-    context.success!
+    context.success
   end
 end
 
@@ -154,7 +154,7 @@ class CustomEventListener < EventPeople::Listeners::Base
   def pay(event)
     puts "Paid #{event.body['amount']} for #{event.body['name']} ~> #{event.name}"
 
-    success!
+    success
   end
 
   def receive(event)
@@ -162,16 +162,16 @@ class CustomEventListener < EventPeople::Listeners::Base
       puts "Received #{event.body['amount']} from #{event.body['name']} ~> #{event.name}"
     else
       puts '[consumer] Got SKIPPED message'
-      return reject!
+      return reject
     end
 
-    success!
+    success
   end
 
   def private_channel(event)
     puts "[consumer] Got a private message: \"#{event.body['message']}\" ~> #{event.name}"
 
-    success!
+    success
   end
 end
 ```
@@ -222,18 +222,47 @@ EventPeople::Daemon.start
 
 ## Retry and Dead Letter Queue (DLQ)
 
-### Environment variables
+### Configuration
 
-| Variable | Description | Default |
-|---|---|---|
-| `RABBIT_EVENT_PEOPLE_MAX_RETRIES` | Max retry attempts before dead-lettering | `3` |
-| `RABBIT_EVENT_PEOPLE_RETRY_TTL_MS` | Base delay in ms for retry backoff | `1000` |
+Retry behaviour is configured in code, not via environment variables (since v1.2.0):
+
+```ruby
+# Optional: set global retry defaults (call once at boot time)
+EventPeople::Config.configure(
+  max_attempts:   5,          # default: 3
+  initial_delay:  500,        # default: 1000 ms
+  delay_strategy: 'fixed',   # default: 'exponential'
+  dlq_name:       'my_dlq'   # default: '{app_name}_dlq'
+)
+```
+
+Connection attributes (`RABBIT_URL`, `RABBIT_EVENT_PEOPLE_APP_NAME`, etc.) are still read from environment variables.
+
+### Per-listener override
+
+Retry settings can also be declared directly on a listener class, which overrides the global Config defaults for that listener:
+
+```ruby
+class OrderListener < EventPeople::Listeners::Base
+  self.max_attempts   = 5
+  self.initial_delay  = 500
+  self.delay_strategy = 'fixed'
+  self.dlq_name       = 'orders_dlq'
+
+  bind :handle_created, 'order.service.created'
+
+  def handle_created(event)
+    # ...
+  end
+end
+```
 
 ### How it works
 
 On `context.fail`:
 - If retries remain → message published to `{queue}_retry` with exponential backoff delay, then acked
 - If retries exhausted → nacked to DLQ via RabbitMQ DLX
+- If publish to retry queue fails → nacked to DLQ (never requeued, to avoid infinite loops)
 
 On `context.reject` → nacked directly to DLQ (no retries)
 
@@ -270,11 +299,6 @@ class OrderListener < EventPeople::Listeners::Base
     fail  # → retry queue (or DLQ if exhausted)
   end
 end
-
-# Per-listener retry config (overrides env var defaults)
-EventPeople::Listener.on('order.service.created', method(:handle),
-                         max_attempts: 5,
-                         delay_strategy: 'exponential')
 ```
 
 > **Note:** `success!`, `fail!`, `reject!` still work but are deprecated — prefer `success`, `fail`, `reject`.

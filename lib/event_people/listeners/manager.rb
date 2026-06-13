@@ -5,7 +5,7 @@ module EventPeople
       class << self
         def bind_all_listeners
           listener_configurations.each do |config|
-            EventPeople::Listener.on(config[:routing_key]) do |event, context|
+            EventPeople::Listener.on(config[:routing_key], listener_class: config[:listener_class]) do |event, context|
               config[:listener_class].new(context).callback(config[:method], event)
             end
           end

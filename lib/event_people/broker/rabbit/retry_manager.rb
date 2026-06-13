@@ -1,12 +1,12 @@
 module EventPeople
   module Broker
     class Rabbit::RetryManager
-      INITIAL_DELAY = (ENV['RABBIT_EVENT_PEOPLE_RETRY_TTL_MS'] || 1000).to_i
       MAX_DELAY = 600_000
 
-      def initialize(max_attempts, delay_strategy = 'exponential')
+      def initialize(max_attempts, delay_strategy = 'exponential', initial_delay: nil)
         @max_attempts   = max_attempts
         @delay_strategy = delay_strategy
+        @initial_delay  = initial_delay || EventPeople::Config.initial_delay
       end
 
       def should_retry?(retry_count)
@@ -15,9 +15,9 @@ module EventPeople
 
       def get_next_delay(retry_count)
         if @delay_strategy == 'fixed'
-          INITIAL_DELAY
+          @initial_delay
         else
-          [INITIAL_DELAY * (5**retry_count), MAX_DELAY].min
+          [@initial_delay * (5**retry_count), MAX_DELAY].min
         end
       end
     end
