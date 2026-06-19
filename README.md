@@ -261,10 +261,12 @@ end
 
 On `context.fail`:
 - If retries remain → message published to `{queue}_retry` with exponential backoff delay, then acked
-- If retries exhausted → nacked to DLQ via RabbitMQ DLX
-- If publish to retry queue fails → nacked to DLQ (never requeued, to avoid infinite loops)
+- If retries exhausted → message published to the `{app_name}_dlq` queue (application-level), then acked
+- If publish to retry queue fails → nacked without requeue (never requeued, to avoid infinite loops)
 
-On `context.reject` → nacked directly to DLQ (no retries)
+On `context.reject` → message published to the `{app_name}_dlq` queue (application-level), then acked
+
+Dead-lettering is handled **at the application level**: the library publishes failed messages directly to a plain `{app_name}_dlq` queue via the default exchange, rather than relying on a broker dead-letter-exchange. If the DLQ publish fails (or no DLQ is configured) the message is nacked without requeue.
 
 **Delay strategies:**
 - `exponential` (default): `min(initialDelay × 5^retry_count, 600000)` ms
@@ -274,9 +276,21 @@ On `context.reject` → nacked directly to DLQ (no retries)
 
 | Queue/Exchange | Name | Purpose |
 |---|---|---|
-| Exchange (DLX) | `{app_name}_dlx` | Fanout, receives dead-lettered messages |
-| DLQ | `{app_name}_dlq` | Final resting place for failed messages |
+| Main queue | `{app_name}-{routing_key}.all` | Declared **argument-free** (no dead-letter-exchange) |
+| DLQ | `{app_name}_dlq` | Plain durable queue; the library publishes failed messages to it directly |
 | Retry queue | `{queue_name}_retry` | Holds messages until backoff delay expires |
+
+> No `{app_name}_dlx` fanout exchange is declared anymore — dead-lettering is application-level.
+
+### Migrating from the broker-DLX version (≤ v1.2.0)
+
+Upgrading from the previous broker-DLX implementation (where the main queue was declared **with**
+`x-dead-letter-exchange: {app_name}_dlx`) is **not drop-in**. RabbitMQ queue arguments are immutable,
+so the first argument-free redeclare against an existing main queue fails with `PRECONDITION_FAILED`.
+
+Operators must **delete the old main queue once** (per environment) so the library can recreate it
+argument-free on the next subscribe. The `{app_name}_dlx` fanout exchange left over from the old
+topology is harmless and can be deleted at leisure.
 
 ### Usage
 

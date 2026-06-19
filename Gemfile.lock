@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    event_people (1.2.0)
+    event_people (1.3.0)
       bunny (~> 2.7)
 
 GEM
