@@ -1,16 +1,13 @@
 describe EventPeople::Broker::Rabbit::Queue do
   let(:app_name) { EventPeople::Config::APP_NAME.downcase }
-  let(:dlx_name) { "#{EventPeople::Config::APP_NAME}_dlx" }
   let(:dlq_name) { "#{EventPeople::Config::APP_NAME}_dlq" }
-  let(:dlx_exchange) { double('dlx_exchange') }
-  let(:dlq_queue) { double('dlq_queue', bind: nil) }
+  let(:dlq_queue) { double('dlq_queue') }
   let(:retry_queue) { double('retry_queue') }
   let(:instance) { described_class.new(connection) }
   let(:connection) do
     double('conn',
       prefetch: 1,
-      queue: bindable,
-      fanout: dlx_exchange
+      queue: bindable
     )
   end
   let(:bindable) { double('bindable', bind: subscribable) }
@@ -55,20 +52,15 @@ describe EventPeople::Broker::Rabbit::Queue do
 
   describe '#subscribe' do
     let(:main_queue_options) do
-      {
-        durable:   true,
-        arguments: { 'x-dead-letter-exchange' => dlx_name }
-      }
+      { durable: true }
     end
     let(:queue_name) { "#{app_name}-#{routing_key.downcase}.all" }
     let(:retry_queue_name) { "#{queue_name}_retry" }
 
     before do
       allow(EventPeople::Broker::Rabbit::Topic).to receive(:topic).and_return(topic)
-      # DLX / DLQ setup
-      allow(connection).to receive(:fanout).with(dlx_name, durable: true).and_return(dlx_exchange)
+      # App-level DLQ: a plain durable queue, no fanout exchange, no binding.
       allow(connection).to receive(:queue).with(dlq_name, durable: true).and_return(dlq_queue)
-      allow(dlq_queue).to receive(:bind).with(dlx_exchange, routing_key: '')
       # Retry queue
       allow(connection).to receive(:queue).with(
         retry_queue_name,
@@ -86,6 +78,26 @@ describe EventPeople::Broker::Rabbit::Queue do
 
     it 'instantiates a queue with correct attributes' do
       expect(connection).to receive(:queue).with(queue_name, main_queue_options).and_return(bindable)
+
+      subject
+    end
+
+    it 'declares the main queue WITHOUT any dead-letter argument' do
+      expect(connection).to receive(:queue) do |name, opts|
+        if name == queue_name
+          expect(opts).to eq(durable: true)
+          expect(opts).not_to have_key(:arguments)
+        end
+        bindable
+      end.at_least(:once)
+
+      subject
+    end
+
+    it 'declares a plain durable DLQ and no fanout DLX exchange or binding' do
+      expect(connection).to receive(:queue).with(dlq_name, durable: true).and_return(dlq_queue)
+      expect(connection).not_to receive(:fanout)
+      expect(dlq_queue).not_to receive(:bind)
 
       subject
     end

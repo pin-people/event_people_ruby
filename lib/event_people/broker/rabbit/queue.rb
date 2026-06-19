@@ -14,7 +14,7 @@ module EventPeople
         base_name = routing_key.split('.')[0..2].join('.')
         name = queue_name("#{base_name}.all")
 
-        declare_dlx_and_dlq
+        declare_dlq
         declare_retry_queue(name)
 
         channel.queue(name, main_queue_options)
@@ -28,12 +28,14 @@ module EventPeople
 
       attr_reader :channel
 
-      def declare_dlx_and_dlq
-        dlx_name = "#{EventPeople::Config::APP_NAME}_dlx"
+      # Declares the application-level dead-letter queue (idempotent). It is a plain
+      # durable queue, not bound to any dead-letter-exchange: the library publishes
+      # failed messages to it directly (see RabbitContext). No DLX fanout exchange or
+      # binding is created, so there is no broker-side topology to drift between versions.
+      def declare_dlq
         dlq_name = "#{EventPeople::Config::APP_NAME}_dlq"
 
-        dlx = channel.fanout(dlx_name, durable: true)
-        channel.queue(dlq_name, durable: true).bind(dlx, routing_key: '')
+        channel.queue(dlq_name, durable: true)
       end
 
       def declare_retry_queue(main_queue_name)
@@ -68,11 +70,13 @@ module EventPeople
         Rabbit::Topic.topic(channel)
       end
 
+      # The main queue is declared WITHOUT a dead-letter-exchange argument.
+      # Dead-lettering is handled at the application level (see RabbitContext:
+      # #reject and retry exhaustion publish to <app>_dlq). Keeping the main queue
+      # argument-free means upgrades over legacy queues never hit PRECONDITION_FAILED
+      # on redeclare.
       def main_queue_options
-        {
-          durable:   true,
-          arguments: { 'x-dead-letter-exchange' => "#{EventPeople::Config::APP_NAME}_dlx" }
-        }
+        { durable: true }
       end
 
       def queue_name(routing_key)
