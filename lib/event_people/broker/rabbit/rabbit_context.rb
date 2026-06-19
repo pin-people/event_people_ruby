@@ -3,6 +3,8 @@ module EventPeople
     class Rabbit::RabbitContext < EventPeople::Broker::Context
       attr_reader :max_retries, :dlq_name
 
+      # Builds a context for a single delivered message, resolving retry/DLQ
+      # settings from the explicit arguments or falling back to EventPeople::Config.
       def initialize(channel, delivery_info, retry_count: 0, max_retries: nil, initial_delay: nil, delay_strategy: nil, dlq_name: nil, queue_name: nil, original_payload: nil)
         @channel          = channel
         @delivery_info    = delivery_info
@@ -15,14 +17,18 @@ module EventPeople
         @original_payload = original_payload
       end
 
+      # Returns true when the current attempt is the final allowed retry.
       def is_last_retry
         @retry_count >= @max_retries - 1
       end
 
+      # Acknowledges the message as successfully processed.
       def success
         @channel.ack(@delivery_info.delivery_tag, false)
       end
 
+      # Handles a processing failure: republishes to the retry queue with backoff
+      # while retries remain, otherwise dead-letters the message to the app-level DLQ.
       def fail
         retry_manager = Rabbit::RetryManager.new(@max_retries, @delay_strategy, initial_delay: @initial_delay)
 
@@ -58,6 +64,7 @@ module EventPeople
         end
       end
 
+      # Rejects the message outright, dead-lettering it to the app-level DLQ.
       def reject
         publish_to_dlq
       end
@@ -93,6 +100,8 @@ module EventPeople
         end
       end
 
+      # Nacks the message without requeue, ignoring errors from an already-closed
+      # channel. Used as the fallback when publishing to the DLQ is not possible.
       def safe_nack
         @channel.nack(@delivery_info.delivery_tag, false, false)
       rescue
