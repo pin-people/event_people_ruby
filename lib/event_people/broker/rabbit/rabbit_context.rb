@@ -36,8 +36,8 @@ module EventPeople
               headers: { 'x-event-people-retries' => @retry_count + 1 }
             )
           rescue => e
-            # Publish failed — nack without requeue so the DLX routes to DLQ.
-            # Requeuing without incrementing x-event-people-retries would cause an infinite loop.
+            # Publish failed — nack without requeue to avoid an infinite redelivery loop.
+            # Requeuing without incrementing x-event-people-retries would loop forever.
             begin
               @channel.nack(@delivery_info.delivery_tag, false, false)
             rescue
@@ -49,16 +49,54 @@ module EventPeople
             @channel.ack(@delivery_info.delivery_tag, false)
           rescue
             # Publish already succeeded; swallow ack errors. The message may be redelivered
-            # once (at-least-once), but that is safer than nacking to DLQ when a retry copy
+            # once (at-least-once), but that is safer than nacking when a retry copy
             # is already enqueued.
           end
         else
-          @channel.nack(@delivery_info.delivery_tag, false, false)
+          # Retries exhausted: publish the message to the application-level DLQ + ack.
+          publish_to_dlq
         end
       end
 
       def reject
-        @channel.reject(@delivery_info.delivery_tag, false)
+        publish_to_dlq
+      end
+
+      private
+
+      # Forwards the current message body to the application-level DLQ via the default
+      # exchange (routing key = DLQ name), so failed messages are dead-lettered without
+      # relying on a broker dead-letter-exchange. Falls back to nack(requeue=false) when
+      # no channel/DLQ is configured or the publish fails.
+      def publish_to_dlq
+        if @channel.nil? || @dlq_name.nil? || @dlq_name.empty?
+          safe_nack
+          return
+        end
+
+        begin
+          @channel.default_exchange.publish(
+            @original_payload,
+            routing_key: @dlq_name,
+            persistent:  true,
+            headers:     { 'x-event-people-retries' => @retry_count }
+          )
+        rescue
+          safe_nack
+          return
+        end
+
+        begin
+          @channel.ack(@delivery_info.delivery_tag, false)
+        rescue
+          # Publish already succeeded; swallow ack errors (at-least-once on the DLQ).
+        end
+      end
+
+      def safe_nack
+        @channel.nack(@delivery_info.delivery_tag, false, false)
+      rescue
+        # Channel may already be closed; nothing we can do.
       end
     end
   end
