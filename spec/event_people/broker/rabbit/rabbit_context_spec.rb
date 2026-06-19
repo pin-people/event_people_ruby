@@ -7,11 +7,11 @@ RSpec.describe EventPeople::Broker::Rabbit::RabbitContext do
     described_class.new(
       channel,
       delivery_info,
-      retry_count:      retry_count,
-      max_retries:      max_retries,
-      delay_strategy:   'fixed',
-      dlq_name:         dlq_name,
-      queue_name:       'test_queue',
+      retry_count: retry_count,
+      max_retries: max_retries,
+      delay_strategy: 'fixed',
+      dlq_name: dlq_name,
+      queue_name: 'test_queue',
       original_payload: '{"x":1}'
     )
   end
@@ -35,8 +35,8 @@ RSpec.describe EventPeople::Broker::Rabbit::RabbitContext do
       expect(default_exchange).to receive(:publish).with(
         '{"x":1}',
         routing_key: 'test_dlq',
-        persistent:  true,
-        headers:     { 'x-event-people-retries' => 3 }
+        persistent: true,
+        headers: { 'x-event-people-retries' => 3 }
       )
       expect(channel).to receive(:ack).with(42, false)
 
@@ -58,8 +58,8 @@ RSpec.describe EventPeople::Broker::Rabbit::RabbitContext do
       expect(default_exchange).to receive(:publish).with(
         '{"x":1}',
         routing_key: 'test_dlq',
-        persistent:  true,
-        headers:     { 'x-event-people-retries' => 0 }
+        persistent: true,
+        headers: { 'x-event-people-retries' => 0 }
       )
       expect(channel).to receive(:ack).with(42, false)
 

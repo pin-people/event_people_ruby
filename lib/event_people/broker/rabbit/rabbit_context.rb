@@ -76,35 +76,40 @@ module EventPeople
       # relying on a broker dead-letter-exchange. Falls back to nack(requeue=false) when
       # no channel/DLQ is configured or the publish fails.
       def publish_to_dlq
-        if @channel.nil? || @dlq_name.nil? || @dlq_name.empty?
-          safe_nack
-          return
-        end
+        return safe_nack if @channel.nil? || @dlq_name.nil? || @dlq_name.empty?
 
-        begin
-          @channel.default_exchange.publish(
-            @original_payload,
-            routing_key: @dlq_name,
-            persistent:  true,
-            headers:     { 'x-event-people-retries' => @retry_count }
-          )
-        rescue
-          safe_nack
-          return
-        end
+        return safe_nack unless publish_dlq_message
 
-        begin
-          @channel.ack(@delivery_info.delivery_tag, false)
-        rescue
-          # Publish already succeeded; swallow ack errors (at-least-once on the DLQ).
-        end
+        ack_after_dlq
+      end
+
+      # Publishes the message body to the DLQ. Returns true on success, false if the
+      # publish raised (so the caller can fall back to nack).
+      def publish_dlq_message
+        @channel.default_exchange.publish(
+          @original_payload,
+          routing_key: @dlq_name,
+          persistent: true,
+          headers: { 'x-event-people-retries' => @retry_count }
+        )
+        true
+      rescue StandardError
+        false
+      end
+
+      # Acks the original delivery after a successful DLQ publish; swallows ack errors
+      # (at-least-once on the DLQ) since the message is already safely enqueued.
+      def ack_after_dlq
+        @channel.ack(@delivery_info.delivery_tag, false)
+      rescue StandardError
+        # Publish already succeeded; swallow ack errors (at-least-once on the DLQ).
       end
 
       # Nacks the message without requeue, ignoring errors from an already-closed
       # channel. Used as the fallback when publishing to the DLQ is not possible.
       def safe_nack
         @channel.nack(@delivery_info.delivery_tag, false, false)
-      rescue
+      rescue StandardError
         # Channel may already be closed; nothing we can do.
       end
     end
