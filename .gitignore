@@ -13,3 +13,6 @@
 # IDE things
 .idea
 .vscode
+
+# Git worktrees gaia creates, one per task (gaia's worktree skill).
+.claude/worktrees/
